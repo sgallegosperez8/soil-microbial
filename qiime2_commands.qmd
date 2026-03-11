@@ -1,0 +1,9 @@
+---
+title: "qiime2 commands"
+format: html
+---
+
+Created a directory to place all associated data
+```bash
+mkdir soil-microbial
+```

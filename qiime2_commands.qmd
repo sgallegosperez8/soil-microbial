@@ -1,7 +1,8 @@
 ---
-title: "qiime2 commands"
 format: html
 ---
+
+# Soil Microbial Data Qiime2 Pipeline Commands
 
 Created a directory to place all associated data
 ```bash

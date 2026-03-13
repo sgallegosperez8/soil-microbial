@@ -6,5 +6,5 @@ format: html
 
 Created a directory to place all associated data
 ```bash
-mkdir soil-microbial
+mkdir qiime_workflow
 ```

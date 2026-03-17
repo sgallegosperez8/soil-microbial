@@ -4,7 +4,19 @@ format: html
 
 # Soil Microbial Data Qiime2 Pipeline Commands
 
+Two folders labeled as soil_microbial_original and soil-microbial-work
+
+**soil_microbial_original** original sequences
+
+**soil-microbial-work** active working directory with data 
+
 Created a directory to place all associated data
 ```bash
 mkdir qiime_workflow
 ```
+
+Activated conda environment
+```bash
+conda activate qiime2_v2024.10.1
+```
+

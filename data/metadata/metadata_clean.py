@@ -11,7 +11,7 @@ import re
 
 n_data = pd.read_csv('Nachusa_16s_all_metadata_edited.csv')
 
-n_data['sample-id'] = n_data['sample'] + " "+ n_data['ID'].astype(str)
+n_data['sample-id'] = n_data['sample'] + "-"+ n_data['ID'].astype(str)
 
 n_data = n_data.drop(columns= ['ID','sample'])
 
@@ -24,7 +24,7 @@ for col in n_data.columns:
     if n_data[col].dtype == 'str':
         top_row[col] = "categorical"
     elif n_data[col].dtype == 'float64':
-        top_row[col] = "numerical"
+        top_row[col] = "numeric"
 
 top_row['sample-id'] = '#q2:types'
 

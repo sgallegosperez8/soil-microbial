@@ -17,7 +17,12 @@ n_data = n_data.drop(columns= ['ID','sample'])
 
 n_data = n_data.set_index('sample-id').reset_index()
 
+
+n_data['barcode']=n_data['barcode'].str.replace(" ","",regex=False)
 # Insert a new row at the top, str=categorical,float64=numerical, and sample-id=#q2:types
+
+
+
 
 top_row={}
 for col in n_data.columns:
@@ -27,6 +32,7 @@ for col in n_data.columns:
         top_row[col] = "numeric"
 
 top_row['sample-id'] = '#q2:types'
+
 
 # Insert a new row at the top
 top_row = pd.DataFrame([top_row])

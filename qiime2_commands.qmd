@@ -8,7 +8,14 @@ Two folders labeled as soil_microbial_original and soil-microbial-work
 
 **soil_microbial_original** original sequences
 
-**soil-microbial-work** active working directory with data 
+**soil-microbial-work/qiime_workflow** active working directory with data with associate working directories
+
+-- metadata
+
+-- results
+
+- results/visualizations
+
 
 Created a directory to place all associated data
 ```bash
@@ -20,6 +27,28 @@ Activated conda environment
 conda activate qiime2_v2024.10.1
 ```
 
+uploaded updated metadata file (see metadata_clean.py)
 ```bash
+qiime metadata tabulate \
+  --m-input-file metadata/Nachusa_16s_all_metadata_edited2.tsv \
+  --o-visualization metadata-output/soil-metadata-viz.qzv
+```
+import single end forward sequences
+```bash
+qiime tools import \
+--type MultiplexedSingleEndBarcodeInSequence \
+--input-path /mnt/HDD/samanthag/soil-microbial-original/01id01NB_S1_R1_001.fastq.gz \
+--output-path ./results/multiplexed-seqs.qza
+```
 
+```bash
+qiime cutadapt demux-single \
+  --p-cores 16 \
+  --i-seqs multiplexed-seqs.qza \
+  --m-barcodes-file ../metadata/Nachusa_16s_all_metadata_edited2.tsv \
+  --m-barcodes-column barcode \
+  --p-error-rate 0   \
+  --o-per-sample-sequences demultiplexed-seqs.qza \
+  --o-untrimmed-sequences untrimmed-seqs.qza \
+  --verbose
 ```

@@ -32,4 +32,4 @@ top_row['sample-id'] = '#q2:types'
 top_row = pd.DataFrame([top_row])
 df = pd.concat([top_row, n_data]).reset_index(drop=True)
 
-df.to_csv('Nachusa_16s_all_metadata_edited2.csv', index=False)
+df.to_csv('Nachusa_16s_all_metadata_edited2.tsv',sep='\t', index=False)

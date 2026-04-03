@@ -16,6 +16,8 @@ Two folders labeled as soil_microbial_original and soil-microbial-work
 
 - results/visualizations
 
+- results/artifacts
+
 
 Created a directory to place all associated data
 ```bash
@@ -38,17 +40,68 @@ import single end forward sequences
 qiime tools import \
 --type MultiplexedSingleEndBarcodeInSequence \
 --input-path /mnt/HDD/samanthag/soil-microbial-original/01id01NB_S1_R1_001.fastq.gz \
---output-path ./results/multiplexed-seqs.qza
+--output-path ./results/artifacts/multiplexed-seqs.qza
+```
+
+Demultiplexed the single-end sequences in the background
+```bash
+nohup \
+ qiime cutadapt demux-single \
+  --p-cores 16 \
+  --i-seqs ./results/multiplexed-seqs.qza \
+  --m-barcodes-file ./metadata/Nachusa_16s_all_metadata_edited2.tsv \
+  --m-barcodes-column barcode-sequence \
+  --p-error-rate 0   \
+  --o-per-sample-sequences ./results/artifacts/demultiplexed-seqs.qza \
+  --o-untrimmed-sequences ./results/artifacts/untrimmed-seqs.qza \
+  --verbose > demultiplex-job.log 2>&1 &
+```
+
+Created a visualization demux quality plot, will trim at 273
+```bash
+nohup \
+qiime demux summarize \
+  --i-data ./results/artifacts/demultiplexed-seqs.qza \
+  --o-visualization ./results/visualizations/demultiplexed-seqs.qzv \
+  --p-n 20000000 > demultiplex-job-sampling-size-20mil.log 2>&1 &
+```
+create a deblur working directory 
+```bash
+mkdir HOME/soil-microbial-work/qiime_workflow/deblur
+```
+
+
+```bash
+nohup \
+qiime quality-filter q-score \
+ --i-demux ./results/artifacts/demultiplexed-seqs.qza \
+ --o-filtered-sequences ./deblur/demux-filtered-deblur.qza \
+ --o-filter-stats ./deblur/demux-filter-stats-deblur.qza > deblur-data.log 2>&1 &
+ ```
+
+Run deblur
+```bash
+nohup \
+qiime deblur denoise-16S \
+  --i-demultiplexed-seqs ./deblur/demux-filtered-deblur.qza \
+  --p-trim-length 275 \
+  --p-jobs-to-start 18 \
+  --o-representative-sequences ./deblur/rep-seqs-deblur.qza \
+  --o-table ./deblur/table-deblur.qza \
+  --p-sample-stats \
+  --o-stats ./deblur/deblur-stats.qza \
+  --verbose > Deblur-job.log 2>&1 &
+```
+
+Create visualizations 
+```bash
+qiime metadata tabulate \
+  --m-input-file ./deblur/demux-filter-stats-deblur.qza \
+  --o-visualization ./results/visualizations/demux-filter-stats-deblur.qzv
 ```
 
 ```bash
-qiime cutadapt demux-single \
-  --p-cores 16 \
-  --i-seqs multiplexed-seqs.qza \
-  --m-barcodes-file ../metadata/Nachusa_16s_all_metadata_edited2.tsv \
-  --m-barcodes-column barcode \
-  --p-error-rate 0   \
-  --o-per-sample-sequences demultiplexed-seqs.qza \
-  --o-untrimmed-sequences untrimmed-seqs.qza \
-  --verbose
+qiime deblur visualize-stats \
+  --i-deblur-stats ./deblur/demux-filter-stats-deblur.qza \
+  --o-visualization ./results/visualizations/deblur-stats.qzv
 ```

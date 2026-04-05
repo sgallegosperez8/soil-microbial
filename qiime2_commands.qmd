@@ -43,27 +43,27 @@ qiime tools import \
 --output-path ./results/artifacts/multiplexed-seqs.qza
 ```
 
-Demultiplexed the single-end sequences in the background
+Demultiplexed the single-end sequences in the background. Output should include demultiplexed-seqs.qza that is the updated version. 
 ```bash
-nohup \
+
  qiime cutadapt demux-single \
   --p-cores 16 \
-  --i-seqs ./results/multiplexed-seqs.qza \
+  --p-minimum-length 150 \
+  --i-seqs ./results/artifacts/multiplexed-seqs.qza \
   --m-barcodes-file ./metadata/Nachusa_16s_all_metadata_edited2.tsv \
   --m-barcodes-column barcode-sequence \
   --p-error-rate 0   \
-  --o-per-sample-sequences ./results/artifacts/demultiplexed-seqs.qza \
-  --o-untrimmed-sequences ./results/artifacts/untrimmed-seqs.qza \
-  --verbose > demultiplex-job.log 2>&1 &
+  --o-per-sample-sequences ./results/artifacts/demultiplexed-seqs2.qza \
+  --o-untrimmed-sequences ./results/artifacts/untrimmed-seqs2.qza \
+  --verbose 
 ```
 
-Created a visualization demux quality plot, will trim at 273
+Created a visualization demux quality plot, will trim at 275
 ```bash
-nohup \
+
 qiime demux summarize \
-  --i-data ./results/artifacts/demultiplexed-seqs.qza \
-  --o-visualization ./results/visualizations/demultiplexed-seqs.qzv \
-  --p-n 20000000 > demultiplex-job-sampling-size-20mil.log 2>&1 &
+  --i-data ./results/artifacts/demultiplexed-seqs2.qza \
+  --o-visualization ./results/visualizations/demultiplexed-seqs2.qzv
 ```
 create a deblur working directory 
 ```bash
@@ -72,36 +72,50 @@ mkdir HOME/soil-microbial-work/qiime_workflow/deblur
 
 
 ```bash
-nohup \
 qiime quality-filter q-score \
- --i-demux ./results/artifacts/demultiplexed-seqs.qza \
- --o-filtered-sequences ./deblur/demux-filtered-deblur.qza \
- --o-filter-stats ./deblur/demux-filter-stats-deblur.qza > deblur-data.log 2>&1 &
+ --i-demux ./results/artifacts/demultiplexed-seqs2.qza \
+ --o-filtered-sequences ./deblur/demux-filtered-deblur2.qza \
+ --o-filter-stats ./deblur/demux-filter-stats-deblur2.qza 
  ```
 
-Run deblur
+Run deblur(need to run deblur)
 ```bash
-nohup \
 qiime deblur denoise-16S \
-  --i-demultiplexed-seqs ./deblur/demux-filtered-deblur.qza \
+  --i-demultiplexed-seqs ./deblur/demux-filtered-deblur2.qza \
   --p-trim-length 275 \
-  --p-jobs-to-start 18 \
-  --o-representative-sequences ./deblur/rep-seqs-deblur.qza \
-  --o-table ./deblur/table-deblur.qza \
+  --p-jobs-to-start 16 \
+  --o-representative-sequences ./deblur/rep-seqs-deblur2.qza \
+  --o-table ./deblur/table-deblur2.qza \
   --p-sample-stats \
-  --o-stats ./deblur/deblur-stats.qza \
-  --verbose > Deblur-job.log 2>&1 &
+  --o-stats ./deblur/deblur-stats2.qza \
+  --verbose 
 ```
 
 Create visualizations 
 ```bash
 qiime metadata tabulate \
-  --m-input-file ./deblur/demux-filter-stats-deblur.qza \
-  --o-visualization ./results/visualizations/demux-filter-stats-deblur.qzv
+  --m-input-file ./deblur/demux-filter-stats-deblur2.qza \
+  --o-visualization ./results/visualizations/demux-filter-stats-deblur2.qzv
 ```
 
 ```bash
 qiime deblur visualize-stats \
-  --i-deblur-stats ./deblur/demux-filter-stats-deblur.qza \
-  --o-visualization ./results/visualizations/deblur-stats.qzv
+  --i-deblur-stats ./deblur/deblur-stats2.qza \
+  --o-visualization ./results/visualizations/deblur-stats2.qzv
 ```
+
+Create a feature table summary 
+```bash
+qiime feature-table summarize \
+  --i-table ./deblur/table-deblur2.qza \
+  --o-visualization ./results/visualizations/table-deblur2.qzv \
+  --m-sample-metadata-file ./metadata/Nachusa_16s_all_metadata_edited2.tsv
+  ```
+
+provides a mapping of feature IDs to sequences, and links to easily BLAST each sequence against the NCBI nt database
+
+  ```bash
+qiime feature-table tabulate-seqs \
+  --i-data ./deblur/rep-seqs-deblur2.qza \
+  --o-visualization ./results/visualizations/rep-seqs2.qzv
+  ```
